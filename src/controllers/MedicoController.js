@@ -1,24 +1,18 @@
-const Medico = require('../models/Medico');
-const bcrypt = require('bcrypt')
+const path = require('path');
+const Medico = require(path.resolve(__dirname, '../models/Medico'));
+const bcrypt = require('bcrypt');
 const jwt = require("jsonwebtoken");
 
-const createUserToken = require('../helpers/create-user-token')
-
-
-
+const createUserToken = require(path.resolve(__dirname, '../helpers/create-user-token'));
 
 const getMedicoByToken = async (req, res) => {
-
-  const { token } = req.params
-  if (!token){
+  const { token } = req.params;
+  if (!token) {
     return res.status(401).json({ error: "Token nao informado!" });
-  } 
-
+  }
 
   // find Medico
   const decoded = jwt.verify(token, "secretpersonalizado");
-
-
   const crm = decoded.crm;
 
   const medico = await Medico.findOne({
@@ -27,8 +21,7 @@ const getMedicoByToken = async (req, res) => {
   });
 
   res.status(200).json(medico);
-}
-
+};
 
 const create = async (req, res) => {
   try {
@@ -36,18 +29,17 @@ const create = async (req, res) => {
     const validaMedicoExistente = await Medico.findOne({ where: { crm } });
 
     if (validaMedicoExistente) {
-      res.status(422).json({ message: "Médico já cadastrado" })
-      return
+      res.status(422).json({ message: "Médico já cadastrado" });
+      return;
     }
 
-    const salt = await bcrypt.genSalt(12)
-    const reqSenha = req.body.senha
-    const senhaCripografada = await bcrypt.hash(reqSenha, salt)
-    req.body.senha = senhaCripografada
+    const salt = await bcrypt.genSalt(12);
+    const reqSenha = req.body.senha;
+    const senhaCripografada = await bcrypt.hash(reqSenha, salt);
+    req.body.senha = senhaCripografada;
 
     const novoMedico = await Medico.create(req.body);
-    await createUserToken(novoMedico, req, res)
-
+    await createUserToken(novoMedico, req, res);
   } catch (err) {
     res.status(400).json({ erro: err.message });
   }
@@ -81,7 +73,6 @@ const findByCRM = async (req, res) => {
   }
 };
 
-
 // Função para excluir um médico pelo CRM
 const del = async (req, res) => {
   try {
@@ -102,29 +93,26 @@ const login = async (req, res) => {
   const { crm, senha } = req.body;
 
   if (!crm || !senha) {
-
-    res.status(400).json({ erro: "O Crm ou a senha não foram informados" })
-    return
+    res.status(400).json({ erro: "O Crm ou a senha não foram informados" });
+    return;
   }
 
   const medico = await Medico.findOne({ where: { crm } });
 
   if (!medico) {
-    res.status(400).json({ erro: "Usuário não encontrado" })
-    return
+    res.status(400).json({ erro: "Usuário não encontrado" });
+    return;
   }
 
-  const passwordMatch = bcrypt.compareSync(senha, medico.senha)
+  const passwordMatch = bcrypt.compareSync(senha, medico.senha);
 
   if (!passwordMatch) {
-    res.status(401).json({ erro: "Senha incorreta!" })
-    return
+    res.status(401).json({ erro: "Senha incorreta!" });
+    return;
   }
 
-  await createUserToken(medico, req, res)
-
-}
-
+  await createUserToken(medico, req, res);
+};
 
 module.exports = {
   create,

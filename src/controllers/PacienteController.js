@@ -1,8 +1,9 @@
-const Paciente = require('../models/Paciente');
-const bcrypt = require('bcrypt')
+const path = require('path');
+const Paciente = require(path.resolve(__dirname, '../models/Paciente'));
+const bcrypt = require('bcrypt');
 const { Op } = require('sequelize');
 
-const createUserToken = require('../helpers/create-user-token')
+const checkToken = require(path.resolve(__dirname, '../helpers/check-token'));
 
 // Função para criar um novo médico
 const create = async (req, res) => {
@@ -11,25 +12,30 @@ const create = async (req, res) => {
     const validaPacienteExistente = await Paciente.findOne({ where: { cpf } });
 
     if (validaPacienteExistente) {
-      res.status(422).json({ message: "Paciente já cadastrado" })
-      return
+      res.status(422).json({ message: "Paciente já cadastrado" });
+      return;
     }
 
-    const salt = await bcrypt.genSalt(12)
-    const reqSenha = req.body.senha
-    const senhaCripografada = await bcrypt.hash(reqSenha, salt)
-    req.body.senha = senhaCripografada
+    const salt = await bcrypt.genSalt(12);
+    const reqSenha = req.body.senha;
+    const senhaCripografada = await bcrypt.hash(reqSenha, salt);
+    req.body.senha = senhaCripografada;
 
     const novoPaciente = await Paciente.create(req.body);
-    res.status(201).json(novoPaciente)
-
+    res.status(201).json(novoPaciente);
   } catch (err) {
     res.status(400).json({ erro: err.message });
   }
 };
 
+const findAll = async (req, res, next) => {
+  const validaToken = checkToken(req, res, next);
 
-const findAll = async (req, res) => {
+  if (validaToken.status === 401) {
+    res.status(validaToken.status).json({ message: validaToken.mensagem });
+    return;
+  }
+
   try {
     const pacientes = await Paciente.findAll({
       attributes: ['cpf', 'nome', 'datanascimento'],
@@ -41,8 +47,15 @@ const findAll = async (req, res) => {
 };
 
 // Função para obter informações de um Paciente pelo CPF
-const findByCPF = async (req, res) => {
+const findByCPF = async (req, res, next) => {
   try {
+    const validaToken = checkToken(req, res, next);
+
+    if (validaToken.status === 401) {
+      res.status(validaToken.status).json({ message: validaToken.mensagem });
+      return;
+    }
+
     const { cpf } = req.params;
     const paciente = await Paciente.findOne({ where: { cpf }, attributes: ['cpf', 'nome', 'datanascimento'], });
 
@@ -56,18 +69,24 @@ const findByCPF = async (req, res) => {
   }
 };
 
-
-const find = async (req, res) => {
+const find = async (req, res, next) => {
   try {
+    const validaToken = checkToken(req, res, next);
+
+    if (validaToken.status === 401) {
+      res.status(validaToken.status).json({ message: validaToken.mensagem });
+      return;
+    }
+
     const { cpf, nome, datanascimento } = req.query;
     const conditions = {};
 
     if (cpf) {
-      conditions.cpf = cpf; 
+      conditions.cpf = cpf;
     }
 
     if (nome) {
-      conditions.nome = { [Op.like]: `%${nome}%` }; 
+      conditions.nome = { [Op.like]: `%${nome}%` };
     }
 
     if (datanascimento) {
@@ -87,11 +106,18 @@ const find = async (req, res) => {
   } catch (err) {
     res.status(400).json({ erro: err.message });
   }
-}
+};
 
 // Função para excluir um Paciente pelo CPF
-const del = async (req, res) => {
+const del = async (req, res, next) => {
   try {
+    const validaToken = checkToken(req, res, next);
+
+    if (validaToken.status === 401) {
+      res.status(validaToken.status).json({ message: validaToken.mensagem });
+      return;
+    }
+
     const { cpf } = req.params;
     const excluido = await Paciente.destroy({ where: { cpf } });
 
@@ -105,38 +131,10 @@ const del = async (req, res) => {
   }
 };
 
-const login = async (req, res) => {
-  const { cpf, senha } = req.body;
-
-  if (!cpf || !senha) {
-
-    res.status(400).json({ erro: "O CPF ou a senha não foram informados" })
-    return
-  }
-
-  const paciente = await Paciente.findOne({ where: { cpf } });
-
-  if (!paciente) {
-    res.status(400).json({ erro: "Usuário não encontrado" })
-    return
-  }
-
-  const passwordMatch = bcrypt.compareSync(senha, paciente.senha)
-
-  if (!passwordMatch) {
-    res.status(401).json({ erro: "Senha incorreta!" })
-    return
-  }
-
-  await createUserToken(paciente, req, res)
-
-}
-
 module.exports = {
   create,
   findAll,
   findByCPF,
   find,
-  login,
   delete: del,
 };

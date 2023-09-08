@@ -43,30 +43,6 @@ router.get('/filtros', PacienteController.find);
 router.post('/create', PacienteController.create);
 
 
-/**
- * @swagger
- * /v1/paciente/login:
- *   post:
- *     summary: Realiza o login do paciente.
- *     description: Login do paciente e retorna o seu jwt.
- *     tags: [Pacientes]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               cpf:
- *                 type: string
- *               senha:
- *                 type: string
- *     responses:
- *       200:
- *         description: Sucesso, realizou o login.
- */
-router.post('/login', PacienteController.login);
-
 
 /**
  * @swagger

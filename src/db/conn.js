@@ -1,24 +1,17 @@
 const Sequelize = require('sequelize');
+const dotenv = require('dotenv');
 
 
-//AVALIADOR POR GENTILEZA ALTERAR ESSAS INFORMAÇÕES
-const dadosBanco = {
-    nomeDb: "postgres",
-    usuario: "postgres",
-    senha: "12345",
-    host: "localhost",
-    dialect: "postgres",
-    port: 5432
-}
+dotenv.config();
 
-const sequelize = new Sequelize(dadosBanco.nomeDb, dadosBanco.usuario, dadosBanco.senha, {
-    host: dadosBanco.host,
-    dialect: dadosBanco.dialect,
-    port: dadosBanco.port,
-    define: {
-        timestamps: false,
-    },
+
+const sequelize = new Sequelize(process.env.DB_NAME, process.env.DB_USER, process.env.DB_PASSWORD, {
+  host: process.env.DB_HOST,
+  dialect: process.env.DB_DIALECT,
+  port: process.env.DB_PORT,
+  define: {
+    timestamps: false,
+  },
 });
 
-// Exporte a instância do Sequelize
 module.exports = sequelize;

@@ -1,5 +1,4 @@
 const jwt = require("jsonwebtoken");
-const { use } = require("../routes/MedicoRoutes");
 
 const createUserToken = async (user, req, res) => {
     const token = jwt.sign(
@@ -10,7 +9,7 @@ const createUserToken = async (user, req, res) => {
         },
         "secretpersonalizado",
         {
-            expiresIn: "2h" // Define o tempo de expiração para 2 horas
+            expiresIn: "3600s" // Define o tempo de expiração para 3600 segundos (1 hora)
         }
     );
 
