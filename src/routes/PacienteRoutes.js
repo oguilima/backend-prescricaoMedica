@@ -11,6 +11,39 @@ const PacienteController = require('../controllers/PacienteController');
  */
 
 
+
+
+
+/**
+ * @swagger
+ * /v1/paciente/filtros:
+ *   get:
+ *     summary: Filtra pacientes.
+ *     description: Cadastra um paciente.
+ *     tags: [Pacientes]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               cpf:
+ *                 type: string
+ *               nome:
+ *                 type: string
+ *               datanascimento:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Sucesso, filtrou os pacientes.
+ *       400:
+ *         description: Erro, bad request.
+ *       401:
+ *         description: Não autorizado.
+ *       404:
+ *         description: Usuário não encontrado.
+ */
 router.get('/filtros', PacienteController.find);
 
 
@@ -37,8 +70,12 @@ router.get('/filtros', PacienteController.find);
  *               senha:
  *                 type: string
  *     responses:
- *       200:
+ *       201:
  *         description: Sucesso, criou um novo paciente.
+ *       422:
+ *         description: Paciente já cadastrado.
+ *       400:
+ *         description: Bad request.
  */
 router.post('/create', PacienteController.create);
 
@@ -54,6 +91,10 @@ router.post('/create', PacienteController.create);
  *     responses:
  *       200:
  *         description: Sucesso, listou todos os pacientes.
+ *       400:
+ *         description: Bad request.
+ *       401:
+ *         description: Não autorizado.
  */
 router.get('/listAll', PacienteController.findAll);
 
@@ -76,6 +117,12 @@ router.get('/listAll', PacienteController.findAll);
  *     responses:
  *       200:
  *         description: Sucesso, listou o médico corretamente.
+ *       400:
+ *         description: Bad request.
+ *       401:
+ *         description: Não autorizado.
+ *       404:
+ *         description: Não encontrado.
  */
 router.get('/:cpf', PacienteController.findByCPF);
 
@@ -100,7 +147,14 @@ router.get('/:cpf', PacienteController.findByCPF);
  *     responses:
  *       200:
  *         description: Sucesso, excluiu o paciente corretamente.
+ *       400:
+ *         description: Bad request.
+ *       401:
+ *         description: Não autorizado.
+ *       404:
+ *         description: Não encontrado.
  */
+ 
 router.delete('/:cpf', PacienteController.delete);
 
 module.exports = router;

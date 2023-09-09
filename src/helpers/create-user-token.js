@@ -2,7 +2,6 @@ const jwt = require("jsonwebtoken");
 
 const createUserToken = async (user, req, res) => {
     const token = jwt.sign(
-        // payload data
         {
             nome: user.nome,
             crm: user.crm,

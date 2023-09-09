@@ -5,25 +5,28 @@ const { Op } = require('sequelize');
 
 const checkToken = require(path.resolve(__dirname, '../helpers/check-token'));
 
-// Função para criar um novo médico
+// Função para criar um novo paciente
 const create = async (req, res) => {
   try {
-    const { cpf } = req.body;
-    const validaPacienteExistente = await Paciente.findOne({ where: { cpf } });
 
+    const { cpf, senha } = req.body;
+    const strCpf = cpf.toString()
+    
+    const validaPacienteExistente = await Paciente.findOne({ where: { cpf: strCpf } });
+    
     if (validaPacienteExistente) {
       res.status(422).json({ message: "Paciente já cadastrado" });
       return;
     }
 
     const salt = await bcrypt.genSalt(12);
-    const reqSenha = req.body.senha;
-    const senhaCripografada = await bcrypt.hash(reqSenha, salt);
+    const senhaCripografada = await bcrypt.hash(senha, salt);
     req.body.senha = senhaCripografada;
 
     const novoPaciente = await Paciente.create(req.body);
     res.status(201).json(novoPaciente);
   } catch (err) {
+    
     res.status(400).json({ erro: err.message });
   }
 };
@@ -40,7 +43,7 @@ const findAll = async (req, res, next) => {
     const pacientes = await Paciente.findAll({
       attributes: ['cpf', 'nome', 'datanascimento'],
     });
-    res.json(pacientes);
+    res.status(200).json(pacientes);
   } catch (err) {
     res.status(400).json({ erro: err.message });
   }
@@ -63,7 +66,7 @@ const findByCPF = async (req, res, next) => {
       return res.status(404).json({ erro: 'Paciente não encontrado' });
     }
 
-    res.json(paciente);
+    res.status(200).json(paciente);
   } catch (err) {
     res.status(400).json({ erro: err.message });
   }
@@ -73,7 +76,7 @@ const find = async (req, res, next) => {
   try {
     const validaToken = checkToken(req, res, next);
 
-    if (validaToken.status === 401) {
+    if (validaToken.status === 401 || validaToken.status == 400) {
       res.status(validaToken.status).json({ message: validaToken.mensagem });
       return;
     }
@@ -102,9 +105,9 @@ const find = async (req, res, next) => {
       return res.status(404).json({ erro: 'Pacientes não encontrados' });
     }
 
-    res.json(pacientes);
+    res.status(200).json(pacientes);
   } catch (err) {
-    res.status(400).json({ erro: err.message });
+    res.status(400).json({ erro: "Token invalido" });
   }
 };
 
@@ -122,7 +125,7 @@ const del = async (req, res, next) => {
     const excluido = await Paciente.destroy({ where: { cpf } });
 
     if (excluido) {
-      return res.json({ mensagem: 'Paciente excluído com sucesso' });
+      return res.status(200).json({ mensagem: 'Paciente excluído com sucesso' });
     }
 
     return res.status(404).json({ erro: 'Paciente não encontrado' });

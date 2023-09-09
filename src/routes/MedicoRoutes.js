@@ -9,7 +9,30 @@ const MedicoController = require('../controllers/MedicoController');
  *   description: Rotas relacionadas a médicos
  */
 
-
+/**
+ * @swagger
+ * /v1/medicos/token/{token}:
+ *   get:
+ *     summary: Obtém informações do médico pelo Token.
+ *     description: Retorna as informações do médico com base no token de autenticação.
+ *     tags: [Médicos]
+ *     security:
+ *       - bearerAuth: [Bearer token]
+ *     parameters:
+ *       - in: path
+ *         name: token
+ *         required: true
+ *         description: Token de autenticação do médico.
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Sucesso, retornou as informações do médico.
+ *       401:
+ *         description: Erro, token não informado.
+ *       400:
+ *         description: Erro, bad request.
+ */
 router.get('/token/:token', MedicoController.getMedicoByToken);
 
 /**
@@ -17,8 +40,8 @@ router.get('/token/:token', MedicoController.getMedicoByToken);
  * /v1/medicos/create:
  *   post:
  *     summary: Cria um médico.
- *     description: Cadastra um médico e retorna o seu jwt.
- *     tags: [Médicos] 
+ *     description: Cadastra um médico e retorna o seu JWT.
+ *     tags: [Médicos]
  *     requestBody:
  *       required: true
  *       content:
@@ -35,18 +58,21 @@ router.get('/token/:token', MedicoController.getMedicoByToken);
  *               senha:
  *                 type: string
  *     responses:
- *       200:
- *         description: Sucesso, criou um novo médico.
+ *       201:
+ *         description: Sucesso, criou um novo médico e retornou o JWT.
+ *       422:
+ *         description: Erro, médico já existe.
+ *       400:
+ *         description: Erro, bad request.
  */
 router.post('/create', MedicoController.create);
-
 
 /**
  * @swagger
  * /v1/medicos/login:
  *   post:
  *     summary: Realiza o login do médico.
- *     description: Login do médico e retorna o seu jwt.
+ *     description: Login do médico e retorna o seu JWT.
  *     tags: [Médicos]
  *     requestBody:
  *       required: true
@@ -61,10 +87,13 @@ router.post('/create', MedicoController.create);
  *                 type: string
  *     responses:
  *       200:
- *         description: Sucesso, realizou o login.
+ *         description: Sucesso, realizou o login e retornou o JWT.
+ *       400:
+ *         description: erro, não foi possível realizar o login.
+ *       401:
+ *         description: erro, senha incorreta.
  */
 router.post('/login', MedicoController.login);
-
 
 /**
  * @swagger
@@ -72,14 +101,16 @@ router.post('/login', MedicoController.login);
  *   get:
  *     summary: Listar médicos.
  *     description: Lista todos os médicos.
- *     tags: [Médicos] 
+ *     tags: [Médicos]
+ *     security:
+ *       - bearerAuth: [Bearer token]
  *     responses:
  *       200:
  *         description: Sucesso, listou todos os médicos.
+ *       400:
+ *         description: Erro, bad request.
  */
 router.get('/listAll', MedicoController.findAll);
-
-
 
 /**
  * @swagger
@@ -98,12 +129,12 @@ router.get('/listAll', MedicoController.findAll);
  *     responses:
  *       200:
  *         description: Sucesso, listou o médico corretamente.
+ *       404:
+ *         description: Médico não encontrado.
+ *       400:
+ *         description: Bad request.
  */
 router.get('/:crm', MedicoController.findByCRM);
-
-
-
-
 
 /**
  * @swagger
@@ -112,6 +143,8 @@ router.get('/:crm', MedicoController.findByCRM);
  *     summary: Deleta médico por CRM.
  *     description: Deleta médico por CRM.
  *     tags: [Médicos]
+ *     security:
+ *       - bearerAuth: [Bearer token]
  *     parameters:
  *       - in: path
  *         name: crm
@@ -122,7 +155,12 @@ router.get('/:crm', MedicoController.findByCRM);
  *     responses:
  *       200:
  *         description: Sucesso, excluiu o médico corretamente.
+ *       404:
+ *         description: Médico não encontrado.
+ *       400:
+ *         description: Bad request.
  */
 router.delete('/:crm', MedicoController.delete);
+
 
 module.exports = router;

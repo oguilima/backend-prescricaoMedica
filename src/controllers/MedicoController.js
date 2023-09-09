@@ -6,21 +6,26 @@ const jwt = require("jsonwebtoken");
 const createUserToken = require(path.resolve(__dirname, '../helpers/create-user-token'));
 
 const getMedicoByToken = async (req, res) => {
-  const { token } = req.params;
-  if (!token) {
-    return res.status(401).json({ error: "Token nao informado!" });
+  try {
+    const { token } = req.params;
+    if (!token) {
+      return res.status(401).json({ error: "Token nao informado!" });
+    }
+    // find Medico
+    const decoded = jwt.verify(token, "secretpersonalizado");
+
+    const crm = decoded.crm;
+
+    const medico = await Medico.findOne({
+      where: { crm: crm },
+      attributes: ['crm', 'nome', 'datanascimento']
+    });
+
+    res.status(200).json(medico);
+  } catch (err) {
+    res.status(400).json({ message: "Token invalido" });
   }
 
-  // find Medico
-  const decoded = jwt.verify(token, "secretpersonalizado");
-  const crm = decoded.crm;
-
-  const medico = await Medico.findOne({
-    where: { crm: crm },
-    attributes: ['crm', 'nome', 'datanascimento']
-  });
-
-  res.status(200).json(medico);
 };
 
 const create = async (req, res) => {
@@ -67,7 +72,7 @@ const findByCRM = async (req, res) => {
       return res.status(404).json({ erro: 'Médico não encontrado' });
     }
 
-    res.json(medico);
+    res.status(200).json(medico);
   } catch (err) {
     res.status(400).json({ erro: err.message });
   }
@@ -80,7 +85,7 @@ const del = async (req, res) => {
     const excluido = await Medico.destroy({ where: { crm } });
 
     if (excluido) {
-      return res.json({ mensagem: 'Médico excluído com sucesso' });
+      return res.status(200).json({ mensagem: 'Médico excluído com sucesso' });
     }
 
     return res.status(404).json({ erro: 'Médico não encontrado' });

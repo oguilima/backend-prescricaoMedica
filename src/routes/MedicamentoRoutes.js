@@ -34,8 +34,12 @@ const Medicamento = require('../controllers/MedicamentoController');
  *               categoria:
  *                 type: string
  *     responses:
- *       200:
+ *       201:
  *         description: Sucesso, criou um novo medicamento.
+ *       401:
+ *         description: Erro, não autenticado.
+ *       400:
+ *         description: Erro, bad request
  */
 router.post('/create', Medicamento.create);
 
@@ -51,6 +55,10 @@ router.post('/create', Medicamento.create);
  *     responses:
  *       200:
  *         description: Sucesso, listou todos os medicamentos.
+ *       401:
+ *         description: Erro, não autenticado.
+ *       400:
+ *         description: Erro, bad request
  */
 router.get('/findAll', Medicamento.findAll);
 

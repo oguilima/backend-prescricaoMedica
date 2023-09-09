@@ -11,9 +11,6 @@ const ReceitaController = require('../controllers/ReceitaController');
 
 
 
-
-
-
 /**
  * @swagger
  * /v1/receita/create:
@@ -21,6 +18,8 @@ const ReceitaController = require('../controllers/ReceitaController');
  *     summary: Cria uma receita ao paciente.
  *     description: Cadastra uma receita para um paciente.
  *     tags: [Receitas]
+ *     security:
+ *       - bearerAuth: [Bearer token ]  # Aqui você especifica o esquema de autenticação Bearer Token
  *     requestBody:
  *       required: true
  *       content:
@@ -39,8 +38,12 @@ const ReceitaController = require('../controllers/ReceitaController');
  *               dataPrescricao:
  *                 type: string
  *     responses:
- *       200:
+ *       201:
  *         description: Sucesso, criou uma nova receita.
+ *       404:
+ *         description: Recurso não encontrado.
+ *       500:
+ *         description: Erro ao processar.
  *     examples:
  *       application/json:
  *         cpfPaciente: "12345678900"
@@ -50,11 +53,59 @@ const ReceitaController = require('../controllers/ReceitaController');
  */
 router.post('/create', ReceitaController.createReceita);
 
-
+/**
+ * @swagger
+ * /v1/receita/historicoPcpf/{cpf}:
+ *   get:
+ *     summary: Obtém o histórico de receitas de um paciente por CPF.
+ *     description: Retorna o histórico de receitas de um paciente com base no seu CPF.
+ *     tags: [Receitas]
+ *     security:
+ *       - bearerAuth: [Bearer token]
+ *     parameters:
+ *       - name: cpf
+ *         in: path
+ *         description: CPF do paciente.
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Sucesso, retornou o histórico de receitas.
+ *       401:
+ *         description: Não autorizado.
+ *       404:
+ *         description: Não encontrado.
+ */
 router.get('/historicoPcpf/:cpf', ReceitaController.getHistoricoPorCpf);
 
-router.get("/medicamentosPreceita/:id", ReceitaController.getMedicamentosReceitaPid)
-
+/**
+ * @swagger
+ * /v1/receita/medicamentosPreceita/{id}:
+ *   get:
+ *     summary: Obtém os medicamentos de uma receita por ID.
+ *     description: Retorna os medicamentos prescritos em uma receita com base no seu ID.
+ *     tags: [Receitas]
+ *     security:
+ *       - bearerAuth: [Bearer token]
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         description: ID da receita.
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Sucesso, retornou o histórico de receitas.
+ *       401:
+ *         description: Não autorizado.
+ *       404:
+ *         description: Não encontrado.
+ *       500:
+ *         description: Erro ao processar.
+ */
+router.get("/medicamentosPreceita/:id", ReceitaController.getMedicamentosReceitaPid);
 
 
 

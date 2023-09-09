@@ -19,6 +19,7 @@ const checkToken = (req, res, next) => {
 
     const verified = jwt.verify(token, "secretpersonalizado");
 
+
     if (verified) {
       return {
         status: 200,
@@ -32,7 +33,10 @@ const checkToken = (req, res, next) => {
     }
 
   } catch (err) {
-    res.status(400).json({ message: "O Token é inválido!" });
+    return {
+      status: 400,
+      mensagem: "Token Invalido"
+    }
   }
 };
 

@@ -28,7 +28,7 @@ const getHistoricoPorCpf = async (req, res, next) => {
     return res.status(404).json({ message: 'Histórico não encontrado.' });
   }
 
-  res.json(receita);
+  res.status(200).json(receita);
 };
 
 const getMedicamentosReceitaPid = async (req, res, next) => {
@@ -80,10 +80,21 @@ const createReceita = async (req, res, next) => {
     }
 
     const { cpfPaciente, crmMedico, codigosMedicamentos, dataPrescricao } = req.body;
+    
+    const strCpfPaciente = cpfPaciente.toString()
+    const strCrmMedico = crmMedico.toString()
+    const strDataPrescricao = dataPrescricao.toString()
+    let arrMedicamentosStr = []
 
-    const paciente = await Paciente.findOne({ where: { cpf: cpfPaciente } });
-    const medico = await Medico.findOne({ where: { crm: crmMedico } });
-    const medicamentos = await Medicamento.findAll({ where: { codigo: codigosMedicamentos } });
+    //transformar os codigos em str caso venham como integer
+    codigosMedicamentos.map((medicamento) => {
+      arrMedicamentosStr.push(medicamento.toString())
+    })
+    
+
+    const paciente = await Paciente.findOne({ where: { cpf: strCpfPaciente } });
+    const medico = await Medico.findOne({ where: { crm: strCrmMedico } });
+    const medicamentos = await Medicamento.findAll({ where: { codigo: arrMedicamentosStr } });
 
     if (!paciente) {
       return res.status(404).json({ message: 'Paciente não encontrado.' });
@@ -99,21 +110,22 @@ const createReceita = async (req, res, next) => {
 
     // Crie a receita
     const receita = await Receita.create({
-      cpf_paciente: cpfPaciente,
-      crm_medico: crmMedico,
-      dataprescricao: dataPrescricao,
+      cpf_paciente: strCpfPaciente,
+      crm_medico: strCrmMedico,
+      dataprescricao: strDataPrescricao,
     });
 
     const medicamentosReceitasData = medicamentos.map((medicamento) => ({
-      id_receita: receita.id,
-      codigo_medicamento: medicamento.codigo,
+      id_receita: receita.id.toString(),
+      codigo_medicamento: medicamento.codigo.toString(),
     }));
 
+    //inclui os medicamentos na receita
     await MedicamentosReceitas.bulkCreate(medicamentosReceitasData);
 
     res.status(201).json({ message: 'Receita criada com sucesso.' });
   } catch (err) {
-    console.error(err);
+
     res.status(500).json({ error: 'Erro ao criar a receita.' });
   }
 };

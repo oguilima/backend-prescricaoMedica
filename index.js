@@ -3,6 +3,9 @@ const conn = require('./src/db/conn');
 const swaggerJsdoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
 const app = express();
+const dotenv = require('dotenv')
+
+dotenv.config({ path: '.env' });
 
 const cors = require('cors')
 
@@ -17,8 +20,8 @@ const swaggerOptions = {
       description: 'Documentação das APIS do projeto de prescrição médica - NUSA ',
     },
   },
-  apis: ['./src/routes/MedicoRoutes.js', './src/routes/MedicamentoRoutes.js', 
-  './src/routes/PacienteRoutes.js', './src/routes/ReceitaRoutes.js'], 
+  apis: ['./src/routes/MedicoRoutes.js', './src/routes/MedicamentoRoutes.js',
+    './src/routes/PacienteRoutes.js', './src/routes/ReceitaRoutes.js'],
 };
 
 const specs = swaggerJsdoc(swaggerOptions);
@@ -26,7 +29,7 @@ const specs = swaggerJsdoc(swaggerOptions);
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(specs));
 
 // Solve CORS
-app.use(cors({ credentials: true, origin: 'http://localhost:4200' }))
+app.use(cors({ credentials: true, origin: '*' }))
 
 
 
@@ -40,13 +43,20 @@ app.use('/v1/medicamento', MedicamentoRoutes);
 app.use('/v1/paciente', PacienteRoutes);
 app.use('/v1/receita', ReceitaRoutes);
 
+const port = process.env.PORT || 3000;
+
 conn
   .sync()
   .then(() => {
-    app.listen(3000, () => {
-      console.log('Servidor está ouvindo na porta 3000.');
+    app.listen(port, () => {
+      console.log(`Servidor está ouvindo na porta ${port}.`);
     });
   })
   .catch((err) => {
     console.log('Erro ao sincronizar o banco de dados:', err);
   });
+
+
+module.exports = app
+
+
