@@ -9,6 +9,11 @@ const checkToken = require(path.resolve(__dirname, '../helpers/check-token'));
 const create = async (req, res) => {
   try {
 
+    console.log("\n\n\n\n\n DEBUGANDO \n\n\n\n\n")
+    console.log(req.body.datanascimento)
+    console.log(req.body)
+
+
     const { cpf, senha } = req.body;
     const strCpf = cpf.toString()
     
